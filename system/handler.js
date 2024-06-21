@@ -64,7 +64,10 @@ export async function handler(conn, m, chatUpdate) {
       }
 
       if (m.prefix) {
-        let { args, command, text } = m;
+        let { args, text } = m;
+        let isCommand = (m.prefix && m.body.startsWith(m.prefix)) || false;
+        const command = isCommand ? m.command.toLowerCase() : false
+        
         let isAccept = Array.isArray(plugin.command)
           ? plugin.command.some((cmd) => cmd === command)
           : false;

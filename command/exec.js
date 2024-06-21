@@ -1,7 +1,9 @@
 import path from "path";
-import { exec } from "child_process";
+import util from "util";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
+import cp, { exec as _exec } from "child_process";
+let exec = util.promisify(_exec).bind(cp);
 
 export async function before(m) {
   if (m.isBaileys) return;
@@ -32,14 +34,16 @@ export async function before(m) {
   }
 
   if (["$", "exec"].some((a) => m.body.toLowerCase().startsWith(a))) {
+  	let o
     try {
-      exec(m.text, async (err, stdout) => {
-        if (err) return m.reply(func.format(err));
-        if (stdout) return m.reply(func.format(stdout));
-      });
-    } catch (e) {
-      m.reply(func.format(e));
-    }
+            o = await exec(m.text);
+          } catch (e) {
+            o = e;
+          } finally {
+            let { stdout, stderr } = o;
+            if (typeof stdout === "string" && stdout.trim()) m.reply(stdout);
+            if (typeof stderr === "string" && stderr.trim()) m.reply(stderr);
+          }
   }
 
   return !0;
