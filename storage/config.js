@@ -11,7 +11,7 @@ global.author = "Arifzyn";
 global.packname = "Created Sticker By";
 global.link = "https://github.com/Arifzyn19";
 
-global.owner = ["6288213503541"];
+global.owner = ["6288213503541", "6285691464024"];
 global.pairingNumber = "6287760363490"; 
 
 global.prefix = /^[°•π÷×¶∆£¢€¥®™+✓_=|/~!?@#%^&.©^]/i;

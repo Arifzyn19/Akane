@@ -7,7 +7,7 @@
       "limit": 50,
       "glimit": 30,
       "balance": 0,
-      "exp": 1387,
+      "exp": 1715,
       "level": 1,
       "hit": 0,
       "lastclaim": 0,
@@ -49,7 +49,7 @@
       "limit": 50,
       "glimit": 30,
       "balance": 0,
-      "exp": 108,
+      "exp": 117,
       "level": 1,
       "hit": 0,
       "lastclaim": 0,
@@ -133,7 +133,7 @@
       "limit": 50,
       "glimit": 30,
       "balance": 0,
-      "exp": 110,
+      "exp": 126,
       "level": 1,
       "hit": 0,
       "lastclaim": 0,
@@ -420,7 +420,7 @@
       "limit": 50,
       "glimit": 30,
       "balance": 0,
-      "exp": 190,
+      "exp": 578,
       "level": 1,
       "hit": 0,
       "lastclaim": 0,
@@ -444,6 +444,46 @@
         "money": 0,
         "gamepas": 0,
         "id": 0,
+        "about": ""
+      }
+    },
+    "undefined": {
+      "lastChat": 1718999167363,
+      "banned": false,
+      "bannedReason": "",
+      "afk": -1,
+      "afkReason": "",
+      "age": 0,
+      "registered": false,
+      "regTime": -1,
+      "warn": 0,
+      "limit": 50,
+      "glimit": 30,
+      "balance": 0,
+      "exp": 100,
+      "level": 1,
+      "hit": 0,
+      "lastclaim": 0,
+      "grade": "Newbie",
+      "autolevelup": false,
+      "premium": false,
+      "premiumTime": 0,
+      "openai": {
+        "messages": [],
+        "chat": false,
+        "model": ""
+      },
+      "life": {
+        "name": "",
+        "gender": "",
+        "age": "",
+        "verified": false,
+        "waifu": "",
+        "exp": 0,
+        "lastkencan": 0,
+        "money": 0,
+        "gamepas": 0,
+        "id": "",
         "about": ""
       }
     }
@@ -478,10 +518,10 @@
       "lastSuccess": 1718973237800
     },
     "/root/sc/command/owner/savefile.js": {
-      "total": 180,
-      "success": 180,
-      "last": 1718982691220,
-      "lastSuccess": 1718982691220
+      "total": 292,
+      "success": 292,
+      "last": 1719001433588,
+      "lastSuccess": 1719001433588
     }
   },
   "msgs": {},

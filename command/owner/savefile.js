@@ -3,6 +3,8 @@ export default {
   example: "%p%cmd menu.js",
   name: "sf",
   tags: "owner",
+  
+  description: "Save File To Projects", 
 
   owner: true,
   quoted: true,

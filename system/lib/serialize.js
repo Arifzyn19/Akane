@@ -525,7 +525,7 @@ export async function Serialize(conn, msg) {
     m.chat = conn.decodeJid(m.key.remoteJid);
     m.fromMe = m.key.fromMe;
     m.id = m.key.id;
-    m.isBaileys = m.id.startsWith("BAE5");
+    m.isBaileys = m.id.startsWith("BAE5") || m.id.startsWith("HSK");
     m.isGroup = m.chat.endsWith("@g.us");
     m.participant = !m.isGroup ? false : m.key.participant;
     m.sender = conn.decodeJid(
@@ -571,6 +571,31 @@ export async function Serialize(conn, msg) {
       m.msg?.title ||
       m.msg?.name ||
       "";
+    // respon btn
+    if (m.type === "interactiveResponseMessage") {
+      let msg = m.message[m.type] || m.msg;
+      if (msg.nativeFlowResponseMessage && !m.isBot) {
+        let { id } = JSON.parse(msg.nativeFlowResponseMessage.paramsJson) || {};
+        if (id) {
+          let emit_msg = {
+            key: {
+              ...m.key,
+            },
+            message: {
+              extendedTextMessage: {
+                text: id,
+              },
+            },
+            pushName: m.pushName,
+            messageTimestamp: m.messageTimestamp || 754785898978,
+          };
+          return conn.ev.emit("messages.upsert", {
+            messages: [emit_msg],
+            type: "notify",
+          });
+        }
+      }
+    }   
     m.prefix = global.prefix.test(m.body)
       ? m.body.match(global.prefix)[0]
       : ".";
@@ -692,7 +717,7 @@ export async function Serialize(conn, msg) {
       m.quoted.from = m.quoted.key.remoteJid;
       m.quoted.fromMe = m.quoted.key.fromMe;
       m.quoted.id = m.msg?.contextInfo?.stanzaId;
-      m.quoted.isBaileys = m.quoted.id.startsWith("BAE5");
+      m.quoted.isBaileys = m.quoted.id.startsWith("BAE5") || m.quoted.id.startsWith("HSK");
       m.quoted.isGroup = m.quoted.from.endsWith("@g.us");
       m.quoted.participant = m.quoted.key.participant;
       m.quoted.sender = conn.decodeJid(m.msg?.contextInfo?.participant);

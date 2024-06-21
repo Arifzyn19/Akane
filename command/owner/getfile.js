@@ -5,7 +5,8 @@ export default {
   example: "Contoh: %p%cmd menu.js",
   name: "getfile",
   tags: "owner",
-
+  description: "Get File projects",
+  
   owner: true,
 
   run: async (m, { conn }) => {

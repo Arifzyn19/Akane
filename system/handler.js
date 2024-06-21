@@ -1,39 +1,43 @@
 import path from "path";
 import chalk from "chalk";
+import fs from "fs";
 import { exec } from "child_process";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
 import baileys, { delay } from "@whiskeysockets/baileys";
 
+// Utility function to check if a value is a number
 const isNumber = (x) => typeof x === "number" && !isNaN(x);
+
+// Initialize the database
 const database = new (await import("./lib/database.js")).default();
 
 export async function handler(conn, m, chatUpdate) {
-	conn.msgqueque = conn.msgqueque || [];
-	
-  if (!m) return;
+  conn.msgqueque = conn.msgqueque || [];
+  if (!m || typeof m !== 'object') return;
 
   try {
     await database.load(m, db);
   } catch (e) {
     conn.logger.error("Database loader Error: ", e);
   }
-  
+
   try {
-    m.exp = 0;  	
+    m.exp = 0;
     m.limit = false;
-    
-    const isPrems = m.isOwner || db.data.users[m.sender].premium;
+
+    const isPrems = m.isOwner || db.data.users[m.sender]?.premium;
     
     if (!m.isOwner && db.data.settings.self) return;
     if (db.data.settings.pconly && m.chat.endsWith("g.us")) return;
     if (db.data.settings.gconly && !m.chat.endsWith("g.us")) return;
     if (db.data.settings.autoread) conn.readMessages([m.key]);
-    
     if (m.isBaileys) return;
+
+    // Message queue handling
     if (db.data.settings.queque && m.body && !isPrems) {
       let queque = conn.msgqueque,
-        time = 1000 * 5;
+          time = 1000 * 5;
       let previousID = queque[queque.length - 1];
 
       queque.push(m.id || m.key.id);
@@ -42,7 +46,8 @@ export async function handler(conn, m, chatUpdate) {
         await delay(time);
       }, time);
     }
-    
+
+    // Assign experience points
     m.exp += Math.ceil(Math.random() * 10);
     let user = db.users && db.users[m.sender];
     
@@ -66,7 +71,7 @@ export async function handler(conn, m, chatUpdate) {
       if (m.prefix) {
         let { args, text } = m;
         let isCommand = (m.prefix && m.body.startsWith(m.prefix)) || false;
-        const command = isCommand ? m.command.toLowerCase() : false
+        const command = isCommand ? m.command.toLowerCase() : false;
         
         let isAccept = Array.isArray(plugin.command)
           ? plugin.command.some((cmd) => cmd === command)
@@ -84,7 +89,7 @@ export async function handler(conn, m, chatUpdate) {
           continue;
         }
 
-        if (plugin.premium && !isPrem) {
+        if (plugin.premium && !isPrems) {
           m.reply("premium");
           continue;
         }
@@ -109,7 +114,7 @@ export async function handler(conn, m, chatUpdate) {
           continue;
         }
 
-        if (plugin.register && !user.registered) {
+        if (plugin.register && !user?.registered) {
           m.reply("register");
           continue;
         }
@@ -150,7 +155,6 @@ export async function handler(conn, m, chatUpdate) {
 
         try {
           await plugin.run(m, extra);
-          // if (!isPrems) m.limit = m.limit || plugin.limit || false;
         } catch (e) {
           console.error(e);
           m.reply(func.format(e));
@@ -216,7 +220,7 @@ export async function handler(conn, m, chatUpdate) {
         "in",
         chalk.cyan(m.isGroup ? m.metadata.subject : "private chat"),
         "args :",
-        chalk.green(m.body.length),
+        chalk.green(m.body?.length || 0),
       );
   }
 }
@@ -379,3 +383,11 @@ export async function rejectCall(json) {
     }
   }
 }
+
+let file = fileURLToPath(import.meta.url);
+
+fs.watchFile(file, () => {
+  fs.unwatchFile(file);
+  console.log(`Update ${file}`);
+  import(file);
+});
