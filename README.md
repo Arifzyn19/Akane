@@ -1,7 +1,7 @@
-[![-----------------------------------------------------](https://raw.githubusercontent.com/Arifzyn19/Akane/main/storage/media/thumbnail.jpg)](#table-of-contents)
+[![-----------------------------------------------------](https://camo.githubusercontent.com/eefa6fcc1945c8498582793a0ce04ca77b44a1dd795453cebce2dbc3137d9772/68747470733a2f2f74656c656772612e70682f66696c652f6535656362316137343265356137396532353935312e6a7067)](#table-of-contents)
 
 <p align="center">
-    <img src="https://camo.githubusercontent.com/eefa6fcc1945c8498582793a0ce04ca77b44a1dd795453cebce2dbc3137d9772/68747470733a2f2f74656c656772612e70682f66696c652f6535656362316137343265356137396532353935312e6a7067" width="100%" style="margin-left: auto;margin-right: auto;display: block;">
+    <img src="https://raw.githubusercontent.com/Arifzyn19/Akane/main/storage/media/thumbnail.jpg" width="100%" style="margin-left: auto;margin-right: auto;display: block;">
 </p>
 
 <h1 align="center">Akane - Bot</h1>
