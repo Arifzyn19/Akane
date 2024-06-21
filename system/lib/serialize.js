@@ -442,7 +442,7 @@ export function Client({ conn, store }) {
     },
     
     sendListM: {
-      async value(jid, text, footer, url, list, quoted, options = {}) {
+      async value(jid, text, footer, list, url, quoted, options = {}) {
         let header = {
           hasMediaAttachment: false,
         };

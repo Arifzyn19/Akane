@@ -7,7 +7,7 @@
       "limit": 50,
       "glimit": 30,
       "balance": 0,
-      "exp": 795,
+      "exp": 1065,
       "level": 1,
       "hit": 0,
       "lastclaim": 0,
@@ -256,7 +256,7 @@
       "limit": 50,
       "glimit": 30,
       "balance": 0,
-      "exp": 413,
+      "exp": 466,
       "level": 1,
       "hit": 0,
       "lastclaim": 0,
@@ -420,7 +420,7 @@
       "limit": 50,
       "glimit": 30,
       "balance": 0,
-      "exp": 138,
+      "exp": 189,
       "level": 1,
       "hit": 0,
       "lastclaim": 0,
@@ -478,10 +478,10 @@
       "lastSuccess": 1718973237800
     },
     "/root/sc/command/owner/savefile.js": {
-      "total": 17,
-      "success": 17,
-      "last": 1718979984583,
-      "lastSuccess": 1718979984583
+      "total": 73,
+      "success": 73,
+      "last": 1718981327314,
+      "lastSuccess": 1718981327314
     }
   },
   "msgs": {},
