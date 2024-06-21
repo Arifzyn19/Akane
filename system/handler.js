@@ -33,6 +33,8 @@ export async function handler(conn, m, chatUpdate) {
     if (db.data.settings.gconly && !m.chat.endsWith("g.us")) return;
     if (db.data.settings.autoread) conn.readMessages([m.key]);
     if (m.isBaileys) return;
+    
+    
 
     // Message queue handling
     if (db.data.settings.queque && m.body && !isPrems) {

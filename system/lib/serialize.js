@@ -525,13 +525,13 @@ export async function Serialize(conn, msg) {
     m.chat = conn.decodeJid(m.key.remoteJid);
     m.fromMe = m.key.fromMe;
     m.id = m.key.id;
-    m.isBaileys = m.id.startsWith("BAE5") || m.id.startsWith("HSK");
+    m.isBaileys = m.id?.startsWith('3EB0') && m.id?.length === 22 || m.id?.length === 16 || false
     m.isGroup = m.chat.endsWith("@g.us");
     m.participant = !m.isGroup ? false : m.key.participant;
     m.sender = conn.decodeJid(
       m.fromMe ? conn.user.id : m.isGroup ? m.participant : m.chat,
     );
-  }
+  } 
 
   m.pushName = msg.pushName;
   m.isOwner =
@@ -717,7 +717,7 @@ export async function Serialize(conn, msg) {
       m.quoted.from = m.quoted.key.remoteJid;
       m.quoted.fromMe = m.quoted.key.fromMe;
       m.quoted.id = m.msg?.contextInfo?.stanzaId;
-      m.quoted.isBaileys = m.quoted.id.startsWith("BAE5") || m.quoted.id.startsWith("HSK");
+      m.quoted.isBaileys = m.quoted?.id?.startsWith('3EB0') && m.quoted?.id?.length === 22 || m.quoted?.id?.length === 16 || false
       m.quoted.isGroup = m.quoted.from.endsWith("@g.us");
       m.quoted.participant = m.quoted.key.participant;
       m.quoted.sender = conn.decodeJid(m.msg?.contextInfo?.participant);

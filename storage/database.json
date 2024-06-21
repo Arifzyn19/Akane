@@ -7,7 +7,7 @@
       "limit": 50,
       "glimit": 30,
       "balance": 0,
-      "exp": 1715,
+      "exp": 1899,
       "level": 1,
       "hit": 0,
       "lastclaim": 0,
@@ -420,7 +420,7 @@
       "limit": 50,
       "glimit": 30,
       "balance": 0,
-      "exp": 578,
+      "exp": 823,
       "level": 1,
       "hit": 0,
       "lastclaim": 0,
@@ -518,10 +518,16 @@
       "lastSuccess": 1718973237800
     },
     "/root/sc/command/owner/savefile.js": {
-      "total": 292,
-      "success": 292,
-      "last": 1719001433588,
-      "lastSuccess": 1719001433588
+      "total": 299,
+      "success": 299,
+      "last": 1719002398678,
+      "lastSuccess": 1719002398678
+    },
+    "/root/sc/command/utility/afk.js": {
+      "total": 72,
+      "success": 72,
+      "last": 1719003723522,
+      "lastSuccess": 1719003723522
     }
   },
   "msgs": {},

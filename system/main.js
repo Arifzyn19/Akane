@@ -197,6 +197,14 @@ async function start() {
   conn.ev.on("call", async (json) => {
     await (await import(`./handler.js?v=${Date.now()}`)).rejectCall(json);
   });
+  
+  conn.ev.on("presence.update", async (presenceUpdateEvent) => {
+    try {
+      await (await import(`./handler.js?v=${Date.now()}`)).presenceUpdate(presenceUpdateEvent);
+    } catch (error) {
+      console.error('Error handling presence update:', error);
+    }
+  });
 
   setInterval(async () => {
     if (global.db.data) await global.db.write().catch(console.error);
