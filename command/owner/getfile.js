@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from "fs";
 
 export default {
   command: ["getfile", "gf"],
@@ -7,14 +7,14 @@ export default {
   tags: "owner",
 
   owner: true,
-  
+
   run: async (m, { conn }) => {
-    let path = `${m.text}`; 
-    
+    let path = `${m.text}`;
+
     try {
       if (fs.existsSync(path)) {
         let text = fs.readFileSync(path, "utf8");
-        await m.reply(text)
+        await m.reply(text);
       } else {
         await m.reply(`File ${path} tidak ditemukan.`);
       }
@@ -22,5 +22,5 @@ export default {
       console.error(`Error reading file: ${error}`);
       m.reply(`Terjadi kesalahan saat membaca file: ${error.message}`);
     }
-  }
+  },
 };

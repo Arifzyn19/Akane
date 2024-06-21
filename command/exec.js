@@ -34,16 +34,16 @@ export async function before(m) {
   }
 
   if (["$", "exec"].some((a) => m.body.toLowerCase().startsWith(a))) {
-  	let o
+    let o;
     try {
-            o = await exec(m.text);
-          } catch (e) {
-            o = e;
-          } finally {
-            let { stdout, stderr } = o;
-            if (typeof stdout === "string" && stdout.trim()) m.reply(stdout);
-            if (typeof stderr === "string" && stderr.trim()) m.reply(stderr);
-          }
+      o = await exec(m.text);
+    } catch (e) {
+      o = e;
+    } finally {
+      let { stdout, stderr } = o;
+      if (typeof stdout === "string" && stdout.trim()) m.reply(stdout);
+      if (typeof stderr === "string" && stderr.trim()) m.reply(stderr);
+    }
   }
 
   return !0;
