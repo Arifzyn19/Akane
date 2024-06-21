@@ -8,6 +8,8 @@ import Crypto from "crypto";
 import baileys from "@whiskeysockets/baileys";
 import { parsePhoneNumber } from "libphonenumber-js";
 
+const { generateWAMessageFromContent, proto, prepareWAMessageMedia } = baileys;
+
 export function Client({ conn, store }) {
   delete store.groupMetadata;
 
@@ -437,6 +439,71 @@ export function Client({ conn, store }) {
         return m;
       },
       enumerable: true,
+    },
+    
+    sendListM: {
+      async value(jid, text, footer, url, list, quoted, options = {}) {
+        let header = {
+          hasMediaAttachment: false,
+        };
+        
+        let { mime, data: buffer, ext, size } = await Function.getFile(url);
+
+        if (/image/i.test(mime)) {
+          const media = await prepareWAMessageMedia(
+            { image: buffer },
+            { upload: conn.waUploadToServer },
+          );
+          header = {
+            ...header,
+            ...media,
+          };
+        }
+
+        let msg = generateWAMessageFromContent(
+          jid,
+          {
+            viewOnceMessage: {
+              message: {
+                messageContextInfo: {
+                  deviceListMetadata: {},
+                  deviceListMetadataVersion: 2,
+                },
+                interactiveMessage: proto.Message.InteractiveMessage.create({
+                  body: proto.Message.InteractiveMessage.Body.create({
+                    text: text,
+                  }),
+                  footer: proto.Message.InteractiveMessage.Footer.create({
+                    text: footer,
+                  }),
+                  header:
+                    proto.Message.InteractiveMessage.Header.create(header),
+                  nativeFlowMessage:
+                    proto.Message.InteractiveMessage.NativeFlowMessage.create({
+                      buttons: [
+                        {
+                          name: "single_select",
+                          buttonParamsJson: JSON.stringify({
+                            title: "Click Here",
+                            sections: list,
+                          }),
+                        },
+                      ],
+                    }),
+                  contextInfo: options.contextInfo || {},
+                }),
+              },
+            },
+          },
+          { quoted, userJid: quoted.key.remoteJid },
+        );
+
+        conn.relayMessage(jid, msg.message, {
+          messageId: msg.key.id,
+        });
+      },
+      enumerable: true,
+      writable: true,
     },
   });
 

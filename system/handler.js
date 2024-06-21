@@ -147,7 +147,7 @@ export async function handler(conn, m, chatUpdate) {
 
         try {
           await plugin.run(m, extra);
-          if (!isPrem) m.limit = m.limit || plugin.limit || false;
+          // if (!isPrems) m.limit = m.limit || plugin.limit || false;
         } catch (e) {
           console.error(e);
           m.reply(func.format(e));

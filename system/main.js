@@ -2,7 +2,9 @@ import "../storage/config.js";
 import { Client, Serialize } from "./lib/serialize.js";
 import Database from "./lib/database.js";
 
+import fs from "fs";
 import util from "util";
+import path from 'path';
 import pino from "pino";
 import chalk from "chalk";
 import readline from "readline";
@@ -204,13 +206,14 @@ async function start() {
 }
 
 global.plugins = {};
+
 async function filesInit() {
-  const cmdFiles = func.path.join(process.cwd(), "command/**/*.js");
+  const cmdFiles = path.join(process.cwd(), "command/**/*.js");
   const commandsFiles = (await import("glob")).default.sync(cmdFiles);
 
   for (let file of commandsFiles) {
     try {
-      const module = await import(file);
+      const module = await import(`file://${file}`);
       global.plugins[file] = module.default || module;
     } catch (e) {
       console.log(
@@ -222,29 +225,83 @@ async function filesInit() {
   }
 }
 
-async function watchFiles() {
-  let watcher = chokidar.watch([func.path.join(process.cwd(), "command")], {
-    persistent: true,
-  });
+function watchFiles() {
+  const commandDir = path.join(process.cwd(), "command");
+  const subDirs = getSubdirectories(commandDir);
 
-  watcher
-    .on("add", (path) => {
-      return func.reloadPlugin("add", path);
-    })
-    .on("change", (path) => {
-      console.log(
-        chalk.bold.bgRgb(51, 204, 51)("INFO: "),
-        chalk.cyan(`Change file - "${path}"`),
-      );
-      return func.reloadPlugin("change", path);
-    })
-    .on("unlink", (path) => {
-      console.log(
-        chalk.bold.bgRgb(255, 153, 0)("WARNING: "),
-        chalk.redBright(`Deleted file - "${path}"`),
-      );
-      return func.reloadPlugin("delete", path);
+  subDirs.forEach(dir => {
+    fs.watch(dir, { recursive: false }, (eventType, filename) => {
+      if (filename) {
+        const filePath = path.join(dir, filename);
+
+        if (eventType === 'rename') {
+          if (fs.existsSync(filePath)) {
+            console.log(
+              chalk.bold.bgRgb(51, 204, 51)("INFO: "),
+              chalk.cyan(`File added - "${filePath}"`)
+            );
+            reloadPlugin("add", filePath);
+          } else {
+            console.log(
+              chalk.bold.bgRgb(255, 153, 0)("WARNING: "),
+              chalk.redBright(`File deleted - "${filePath}"`)
+            );
+            reloadPlugin("delete", filePath);
+          }
+        } else if (eventType === 'change') {
+          console.log(
+            chalk.bold.bgRgb(51, 204, 51)("INFO: "),
+            chalk.cyan(`File changed - "${filePath}"`)
+          );
+          reloadPlugin("change", filePath);
+        }
+      }
     });
+  });
+}
+
+function getSubdirectories(dir) {
+  const subdirs = [dir];
+  const files = fs.readdirSync(dir);
+
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    if (fs.statSync(filePath).isDirectory()) {
+      subdirs.push(...getSubdirectories(filePath));
+    }
+  }
+
+  return subdirs;
+}
+
+function reloadPlugin(type, file) {
+  const filename = (file) => file.replace(/^.*[\\\/]/, "");
+
+  switch (type) {
+    case "delete":
+      delete global.plugins[file];
+      break;
+    case "add":
+    case "change":
+      (async () => {
+        try {
+          const module = await import(`file://${file}?update=${Date.now()}`);
+          global.plugins[file] = module.default || module;
+        } catch (e) {
+          console.log(
+            chalk.bold.bgRgb(247, 38, 33)("ERROR: "),
+            chalk.rgb(255, 38, 0)(util.format(e)),
+          );
+        } finally {
+          global.plugins = Object.fromEntries(
+            Object.entries(global.plugins).sort(([a], [b]) =>
+              a.localeCompare(b),
+            ),
+          );
+        }
+      })();
+      break;
+  }
 }
 
 start();
