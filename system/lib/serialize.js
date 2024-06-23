@@ -440,13 +440,13 @@ export function Client({ conn, store }) {
       },
       enumerable: true,
     },
-    
+
     sendListM: {
       async value(jid, text, footer, list, url, quoted, options = {}) {
         let header = {
           hasMediaAttachment: false,
         };
-        
+
         let { mime, data: buffer, ext, size } = await Function.getFile(url);
 
         if (/image/i.test(mime)) {
@@ -525,13 +525,16 @@ export async function Serialize(conn, msg) {
     m.chat = conn.decodeJid(m.key.remoteJid);
     m.fromMe = m.key.fromMe;
     m.id = m.key.id;
-    m.isBaileys = m.id?.startsWith('3EB0') && m.id?.length === 22 || m.id?.length === 16 || false
+    m.isBaileys =
+      (m.id?.startsWith("3EB0") && m.id?.length === 22) ||
+      m.id?.length === 16 ||
+      false;
     m.isGroup = m.chat.endsWith("@g.us");
     m.participant = !m.isGroup ? false : m.key.participant;
     m.sender = conn.decodeJid(
       m.fromMe ? conn.user.id : m.isGroup ? m.participant : m.chat,
     );
-  } 
+  }
 
   m.pushName = msg.pushName;
   m.isOwner =
@@ -595,7 +598,7 @@ export async function Serialize(conn, msg) {
           });
         }
       }
-    }   
+    }
     m.prefix = global.prefix.test(m.body)
       ? m.body.match(global.prefix)[0]
       : ".";
@@ -717,7 +720,10 @@ export async function Serialize(conn, msg) {
       m.quoted.from = m.quoted.key.remoteJid;
       m.quoted.fromMe = m.quoted.key.fromMe;
       m.quoted.id = m.msg?.contextInfo?.stanzaId;
-      m.quoted.isBaileys = m.quoted?.id?.startsWith('3EB0') && m.quoted?.id?.length === 22 || m.quoted?.id?.length === 16 || false
+      m.quoted.isBaileys =
+        (m.quoted?.id?.startsWith("3EB0") && m.quoted?.id?.length === 22) ||
+        m.quoted?.id?.length === 16 ||
+        false;
       m.quoted.isGroup = m.quoted.from.endsWith("@g.us");
       m.quoted.participant = m.quoted.key.participant;
       m.quoted.sender = conn.decodeJid(m.msg?.contextInfo?.participant);

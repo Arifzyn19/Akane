@@ -21,12 +21,14 @@ export default {
         await m.reply(`File ${filePath}.js berhasil disimpan.`);
       } catch (error) {
         console.error(`Error saving command file: ${error}`);
-        await m.reply(`Terjadi kesalahan saat menyimpan file command: ${error.message}`);
+        await m.reply(
+          `Terjadi kesalahan saat menyimpan file command: ${error.message}`,
+        );
       }
     };
 
     if (m.quoted) {
-      const quotedContent = m.quoted.body?.trim() || '';
+      const quotedContent = m.quoted.body?.trim() || "";
       if (quotedContent) {
         await saveContent(quotedContent);
         return;
@@ -47,6 +49,8 @@ export default {
       }
     }
 
-    await m.reply("Isi baru dari file command tidak ditemukan atau format file tidak didukung.");
+    await m.reply(
+      "Isi baru dari file command tidak ditemukan atau format file tidak didukung.",
+    );
   },
 };

@@ -4,10 +4,15 @@ export default {
   example: "Contoh: %p%cmd <TikTok URL>", //%p = prefix, %cmd = command, %text = teks
   name: "tiktok",
   tags: "download",
-  
+
   run: async (m, { conn }) => {
     const url = m.args[0];
-    console.log(url);
+
+    if (!func.isUrl(url))
+      return m.reply(
+        `Invalid URL\n\nContoh: ${m.prefix + m.command} https://vm.tiktok.com/ZSY5tdEQW/`,
+      );
+
     const apiTypes = ["", "v2", "v3"];
     let response;
 
@@ -22,7 +27,7 @@ export default {
       console.log(apiUrl);
       try {
         response = await func.fetchJson(apiUrl);
-        if (response.status === 'success') {
+        if (response.status === "success") {
           break; // Break the loop if a successful response is received
         }
       } catch (err) {
@@ -30,13 +35,14 @@ export default {
       }
     }
 
-    if (!response || response.status !== 'success' || !response.data) {
+    if (!response || response.status !== "success" || !response.data) {
       return m.reply("Failed to fetch TikTok video.");
     }
 
     console.log(response);
 
-    const { desc, author, statistics, video, video1, video2, video_hd, music } = response.data;
+    const { desc, author, statistics, video, video1, video2, video_hd, music } =
+      response.data;
     const videoUrl = video || video1 || video2 || video_hd;
 
     if (!videoUrl) {
@@ -44,15 +50,15 @@ export default {
     }
 
     const replyText = `
-      *Description:* ${desc || 'No description'}
-      *Author:* ${author?.nickname || 'Unknown'}
-      *Likes:* ${statistics?.likeCount || '0'}
-      *Comments:* ${statistics?.commentCount || '0'}
-      *Shares:* ${statistics?.shareCount || '0'}
+      *Description:* ${desc || "No description"}
+      *Author:* ${author?.nickname || "Unknown"}
+      *Likes:* ${statistics?.likeCount || "0"}
+      *Comments:* ${statistics?.commentCount || "0"}
+      *Shares:* ${statistics?.shareCount || "0"}
     `;
 
     try {
-      await m.reply(videoUrl, { caption: replyText })
+      await m.reply(videoUrl, { caption: replyText });
     } catch (err) {
       console.error(err);
       m.reply("An error occurred while sending the TikTok video.");

@@ -65,7 +65,7 @@ export default class Database {
       if (!("afkReason" in user)) user.afkReason = "";
       if (!isBoolean(user.registered)) user.registered = false;
       if (!isNumber(user.warn)) user.warn = 0;
-      
+
       if (!user.registered) {
         if (!isNumber(user.age)) user.age = 0;
         if (!("name" in user)) user.name = m.pushName;
@@ -78,7 +78,7 @@ export default class Database {
       if (!isNumber(user.exp)) user.exp = 0;
       if (!isNumber(user.level)) user.level = 1;
       if (!isNumber(user.hit)) user.hit = 1;
-      
+
       if (!isNumber(user.lastclaim)) user.lastclaim = 0;
       if (!isBoolean(user.autolevelup)) user.autolevelup = false;
       if (!user.grade) user.grade = "Newbie";

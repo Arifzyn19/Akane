@@ -4,7 +4,7 @@ import Database from "./lib/database.js";
 
 import fs from "fs";
 import util from "util";
-import path from 'path';
+import path from "path";
 import pino from "pino";
 import chalk from "chalk";
 import readline from "readline";
@@ -13,6 +13,13 @@ import syntaxerror from "syntax-error";
 import { Boom } from "@hapi/boom";
 import NodeCache from "node-cache";
 import baileys from "@whiskeysockets/baileys";
+import {
+  plugins,
+  loadPluginFiles,
+  reload,
+  pluginFolder,
+  pluginFilter,
+} from "./lib/plugins.js";
 
 const store = baileys.makeInMemoryStore({
   logger: pino({ level: "fatal" }).child({ level: "fatal" }),
@@ -43,6 +50,13 @@ global.__dirname = function dirname(pathURL) {
 global.__require = function require(dir = import.meta.url) {
   return createRequire(dir);
 };
+
+loadPluginFiles(pluginFolder, pluginFilter, {
+  logger: conn.logger,
+  recursiveRead: true,
+})
+  .then((_) => console.log(Object.keys(plugins)))
+  .catch(console.error);
 
 async function start() {
   process.on("uncaughtException", (err) => console.error(err));
@@ -198,13 +212,13 @@ async function start() {
   conn.ev.on("creds.update", saveCreds);
   conn.ev.on("messages.upsert", async (message) => {
     if (!message.messages) return;
-    
+
     const m = await Serialize(conn, message.messages[0]);
     await (
       await import(`./handler.js?v=${Date.now()}`)
     ).handler(conn, m, message);
   });
-  
+
   conn.ev.on("group-participants.update", async (message) => {
     await (
       await import(`./handler.js?v=${Date.now()}`)
@@ -218,12 +232,14 @@ async function start() {
   conn.ev.on("call", async (json) => {
     await (await import(`./handler.js?v=${Date.now()}`)).rejectCall(json);
   });
-  
+
   conn.ev.on("presence.update", async (presenceUpdateEvent) => {
     try {
-      await (await import(`./handler.js?v=${Date.now()}`)).presenceUpdate(presenceUpdateEvent);
+      await (
+        await import(`./handler.js?v=${Date.now()}`)
+      ).presenceUpdate(presenceUpdateEvent);
     } catch (error) {
-      console.error('Error handling presence update:', error);
+      console.error("Error handling presence update:", error);
     }
   });
 
@@ -233,85 +249,5 @@ async function start() {
 
   return conn;
 }
-console.log(__dirname) 
-
-global.plugins = {};
-const pluginFolder = path.join(process.cwd(), "command");
-const pluginFilter = (filename) => /\.js$/.test(filename);
-
-async function filesInit() {
-	const cmdFolder = path.join(process.cwd(), 'command/**/*.js');
-  const commandsFiles = (await import("glob")).default.sync(cmdFolder);
-
-  for (let file of commandsFiles) {
-    try {
-      const module = await import(`file://${file}`);
-      global.plugins[file] = module.default || module;
-    } catch (e) {
-      console.log(
-        chalk.bold.bgRgb(247, 38, 33)("ERROR: "),
-        chalk.rgb(255, 38, 0)(util.format(e)),
-      );
-      delete global.plugins[file];
-    }
-  }
-}
-
-global.reload = async (_ev, filename) => {
-  if (pluginFilter(filename)) {
-    let relativePath = path.relative(pluginFolder, filename);
-    let dir = global.__filename(path.join(pluginFolder, relativePath), true);
-    if (filename in global.plugins) {
-      if (fs.existsSync(dir))
-        conn.logger.info(`re - require plugin '${filename}'`);
-      else {
-        conn.logger.warn(`deleted plugin '${filename}'`);
-        return delete global.plugins[filename];
-      }
-    } else conn.logger.info(`requiring new plugin '${filename}'`);
-    let err = syntaxerror(fs.readFileSync(dir), filename, {
-      sourceType: 'module',
-      allowAwaitOutsideFunction: true,
-    });
-    if (err)
-      conn.logger.error(`syntax error while loading '${filename}'\n${format(err)}`);
-    else
-      try {
-        console.log(global.__filename(dir));
-        const module = await import(`${global.__filename(dir)}?update=${Date.now()}`);
-        global.plugins[filename] = module.default || module;
-      } catch (e) {
-        conn.logger.error(`error require plugin '${filename}\n${format(e)}'`);
-      } finally {
-        global.plugins = Object.fromEntries(
-          Object.entries(global.plugins).sort(([a], [b]) => a.localeCompare(b))
-        );
-      }
-  }
-};
-
-Object.freeze(global.reload);
-
-function watchDirRecursively(dir) {
-  fs.watch(dir, { persistent: true }, (_eventType, filename) => {
-    if (filename) {
-      global.reload(null, path.join(dir, filename));
-    }
-  });
-
-  fs.readdir(dir, { withFileTypes: true }, (err, files) => {
-    if (err) {
-      console.error(`Error reading directory ${dir}:`, err);
-      return;
-    }
-    for (const file of files) {
-      if (file.isDirectory()) {
-        watchDirRecursively(path.join(dir, file.name));
-      }
-    }
-  });
-}
 
 start();
-filesInit();
-watchDirRecursively(pluginFolder);

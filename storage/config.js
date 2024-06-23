@@ -12,7 +12,7 @@ global.packname = "Created Sticker By";
 global.link = "https://github.com/Arifzyn19";
 
 global.owner = ["6288213503541", "6285691464024"];
-global.pairingNumber = "62856914640248"; 
+global.pairingNumber = "62856914640248";
 
 global.prefix = /^[°•π÷×¶∆£¢€¥®™+✓_=|/~!?@#%^&.©^]/i;
 global.thumbnail = fs.readFileSync("./storage/media/images.jpg");
@@ -58,7 +58,7 @@ global.API = (name, path = "/", query = {}, apikeyqueryname) => {
     ...query,
     ...(apikeyqueryname && apiKey ? { [apikeyqueryname]: apiKey } : {}),
   });
-  
+
   return baseUrl + path + (queryParams.toString() ? "?" + queryParams : "");
 };
 

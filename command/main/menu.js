@@ -9,13 +9,18 @@ export default {
 
     if (!selectedCategory) {
       let body =
-        "This bot is designed to help WhatsApp users with various features, starting from downloading videos or music, creating stickers, and many other functions.\n\n┌  ◦  *Creator* : Arifzyn\n│  ◦  *Instagram* : arifzxa19\n╰───────···\n\nPlease select a category to see the available commands!";
+        "This bot is designed to help WhatsApp users with various features, starting from downloading videos or music, creating stickers, and many other functions.\n\n┌  ◦  *Creator* : Arifzyn\n│  ◦  *Instagram* : arifzxa19\n╰───────···\n\nPlease select a category to see the available commands.";
 
       const categories = new Set();
 
       for (const [filePath, command] of Object.entries(global.plugins)) {
         const cmd = command.default || command;
-        if (!cmd || !cmd.command || !Array.isArray(cmd.command) || !cmd.command[0]) {
+        if (
+          !cmd ||
+          !cmd.command ||
+          !Array.isArray(cmd.command) ||
+          !cmd.command[0]
+        ) {
           continue;
         }
 
@@ -23,15 +28,17 @@ export default {
         categories.add(category);
       }
 
-      const sections = [{
-        title: "Categories",
-        rows: Array.from(categories).map(category => ({
-          title: category,
-          id: `.menu ${category}`,
-          description: `View commands in the ${category} category`,
-        })),
-      }];
-      
+      const sections = [
+        {
+          title: "Categories",
+          rows: Array.from(categories).map((category) => ({
+            title: category,
+            id: `.menu ${category}`,
+            description: `View commands in the ${category} category`,
+          })),
+        },
+      ];
+
       return conn.sendListM(m.chat, body, wm, sections, "", m);
     } else {
       let body = `Commands in the ${selectedCategory} category:\n\n`;
@@ -40,7 +47,12 @@ export default {
 
       for (const [filePath, command] of Object.entries(global.plugins)) {
         const cmd = command.default || command;
-        if (!cmd || !cmd.command || !Array.isArray(cmd.command) || !cmd.command[0]) {
+        if (
+          !cmd ||
+          !cmd.command ||
+          !Array.isArray(cmd.command) ||
+          !cmd.command[0]
+        ) {
           continue;
         }
 
@@ -50,14 +62,14 @@ export default {
         }
       }
 
-      commandsInCategory.forEach(cmd => {
+      commandsInCategory.forEach((cmd) => {
         body += `• ${cmd.name}: ${cmd.description || "No description"}\n`;
       });
 
       if (commandsInCategory.length === 0) {
         body = `No commands found in the ${selectedCategory} category.`;
       }
-      
+
       return conn.sendMessage(m.chat, { text: body }, { quoted: m });
     }
   },

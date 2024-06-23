@@ -36,7 +36,7 @@ Instal alat ini terlebih dahulu sebelum menjalankan skrip
 - apt-get install -y nodejs
 
 ```bash
-git clone https://github.com/ArifzynXD/Akane 
+git clone https://github.com/ArifzynXD/Akane
 cd Akane
 npm install
 npm update
@@ -101,4 +101,4 @@ export default {
 - [`Hisoka`](https://github.com/Hisoka-Morrou)
 - [`Xiao Yan?`](https://github.com/ImYanXiao)
 - [`AlisaOfc`](https://github.com/AlisaOfc)
-- 
+-

@@ -6,7 +6,7 @@ export default {
   name: "getfile",
   tags: "owner",
   description: "Get File projects",
-  
+
   owner: true,
 
   run: async (m, { conn }) => {

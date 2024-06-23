@@ -5,16 +5,18 @@ import { exec } from "child_process";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
 import baileys, { delay } from "@whiskeysockets/baileys";
-
+import { plugins } from "./lib/plugins.js";
 // Utility function to check if a value is a number
 const isNumber = (x) => typeof x === "number" && !isNaN(x);
 
 // Initialize the database
 const database = new (await import("./lib/database.js")).default();
 
+global.plugins = plugins;
+
 export async function handler(conn, m, chatUpdate) {
   conn.msgqueque = conn.msgqueque || [];
-  if (!m || typeof m !== 'object') return;
+  if (!m || typeof m !== "object") return;
 
   try {
     await database.load(m, db);
@@ -27,19 +29,17 @@ export async function handler(conn, m, chatUpdate) {
     m.limit = false;
 
     const isPrems = m.isOwner || db.data.users[m.sender]?.premium;
-    
+
     if (!m.isOwner && db.data.settings.self) return;
     if (db.data.settings.pconly && m.chat.endsWith("g.us")) return;
     if (db.data.settings.gconly && !m.chat.endsWith("g.us")) return;
     if (db.data.settings.autoread) conn.readMessages([m.key]);
     if (m.isBaileys) return;
-    
-    
 
     // Message queue handling
     if (db.data.settings.queque && m.body && !isPrems) {
       let queque = conn.msgqueque,
-          time = 1000 * 5;
+        time = 1000 * 5;
       let previousID = queque[queque.length - 1];
 
       queque.push(m.id || m.key.id);
@@ -52,9 +52,9 @@ export async function handler(conn, m, chatUpdate) {
     // Assign experience points
     m.exp += Math.ceil(Math.random() * 10);
     let user = db.users && db.users[m.sender];
-    
-    for (let name in global.plugins) {
-      let plugin = global.plugins[name];
+
+    for (let name in plugins) {
+      let plugin = plugins[name];
 
       if (!plugin) continue;
       if (plugin.disabled) continue;
@@ -74,18 +74,18 @@ export async function handler(conn, m, chatUpdate) {
         let { args, text } = m;
         let isCommand = (m.prefix && m.body.startsWith(m.prefix)) || false;
         const command = isCommand ? m.command.toLowerCase() : false;
-        
+
         let isAccept = Array.isArray(plugin.command)
           ? plugin.command.some((cmd) => cmd === command)
           : false;
-          
+
         m.plugin = name;
         if (!isAccept) continue;
         if (m.chat in db.data.chats || m.sender in db.data.users) {
           if (db.data.chats[m.chat]?.isBanned) return;
           if (db.data.users[m.sender]?.banned) return;
         }
-        
+
         if (plugin.owner && !m.isOwner) {
           m.reply("owner");
           continue;
@@ -125,8 +125,8 @@ export async function handler(conn, m, chatUpdate) {
           m.reply("quoted");
           continue;
         }
-        
-        m.isCommand = true;   
+
+        m.isCommand = true;
         let xp = "exp" in plugin ? parseInt(plugin.exp) : 3;
 
         if (xp < 200) m.exp += xp;
@@ -145,7 +145,7 @@ export async function handler(conn, m, chatUpdate) {
           );
           continue;
         }
-        
+
         let extra = {
           conn,
           args,
@@ -212,7 +212,7 @@ export async function handler(conn, m, chatUpdate) {
         }
       }
     }
-    
+
     if (!m.isBaileys && !m.fromMe)
       console.log(
         "~> [\x1b[1;32m CMD \x1b[1;37m]",
@@ -229,7 +229,7 @@ export async function handler(conn, m, chatUpdate) {
 
 export async function participantsUpdate({ id, participants, action }) {
   if (db.data.settings.self) return;
-  
+
   let chat = db.data.chats[id] || {},
     ppuser;
   let metadata = await conn.groupMetadata(id);
