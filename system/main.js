@@ -9,6 +9,7 @@ import pino from "pino";
 import chalk from "chalk";
 import readline from "readline";
 import chokidar from "chokidar";
+import syntaxerror from "syntax-error";
 import { Boom } from "@hapi/boom";
 import NodeCache from "node-cache";
 import baileys from "@whiskeysockets/baileys";
@@ -22,6 +23,26 @@ const rl = readline.createInterface({
 });
 const question = (text) => new Promise((resolve) => rl.question(text, resolve));
 const database = new Database();
+
+import { platform } from "process";
+import { fileURLToPath, pathToFileURL } from "url";
+import { createRequire } from "module"; // Bring in the ability to create the 'require' method
+global.__filename = function filename(
+  pathURL = import.meta.url,
+  rmPrefix = platform !== "win32",
+) {
+  return rmPrefix
+    ? /file:\/\/\//.test(pathURL)
+      ? fileURLToPath(pathURL)
+      : pathURL
+    : pathToFileURL(pathURL).toString();
+};
+global.__dirname = function dirname(pathURL) {
+  return path.dirname(global.__filename(pathURL, true));
+};
+global.__require = function require(dir = import.meta.url) {
+  return createRequire(dir);
+};
 
 async function start() {
   process.on("uncaughtException", (err) => console.error(err));
@@ -212,12 +233,15 @@ async function start() {
 
   return conn;
 }
+console.log(__dirname) 
 
 global.plugins = {};
+const pluginFolder = path.join(process.cwd(), "command");
+const pluginFilter = (filename) => /\.js$/.test(filename);
 
 async function filesInit() {
-  const cmdFiles = path.join(process.cwd(), "command/**/*.js");
-  const commandsFiles = (await import("glob")).default.sync(cmdFiles);
+	const cmdFolder = path.join(process.cwd(), 'command/**/*.js');
+  const commandsFiles = (await import("glob")).default.sync(cmdFolder);
 
   for (let file of commandsFiles) {
     try {
@@ -233,85 +257,61 @@ async function filesInit() {
   }
 }
 
-function watchFiles() {
-  const commandDir = path.join(process.cwd(), "command");
-  const subDirs = getSubdirectories(commandDir);
-
-  subDirs.forEach(dir => {
-    fs.watch(dir, { recursive: false }, (eventType, filename) => {
-      if (filename) {
-        const filePath = path.join(dir, filename);
-
-        if (eventType === 'rename') {
-          if (fs.existsSync(filePath)) {
-            console.log(
-              chalk.bold.bgRgb(51, 204, 51)("INFO: "),
-              chalk.cyan(`File added - "${filePath}"`)
-            );
-            reloadPlugin("add", filePath);
-          } else {
-            console.log(
-              chalk.bold.bgRgb(255, 153, 0)("WARNING: "),
-              chalk.redBright(`File deleted - "${filePath}"`)
-            );
-            reloadPlugin("delete", filePath);
-          }
-        } else if (eventType === 'change') {
-          console.log(
-            chalk.bold.bgRgb(51, 204, 51)("INFO: "),
-            chalk.cyan(`File changed - "${filePath}"`)
-          );
-          reloadPlugin("change", filePath);
-        }
+global.reload = async (_ev, filename) => {
+  if (pluginFilter(filename)) {
+    let relativePath = path.relative(pluginFolder, filename);
+    let dir = global.__filename(path.join(pluginFolder, relativePath), true);
+    if (filename in global.plugins) {
+      if (fs.existsSync(dir))
+        conn.logger.info(`re - require plugin '${filename}'`);
+      else {
+        conn.logger.warn(`deleted plugin '${filename}'`);
+        return delete global.plugins[filename];
       }
+    } else conn.logger.info(`requiring new plugin '${filename}'`);
+    let err = syntaxerror(fs.readFileSync(dir), filename, {
+      sourceType: 'module',
+      allowAwaitOutsideFunction: true,
     });
-  });
-}
+    if (err)
+      conn.logger.error(`syntax error while loading '${filename}'\n${format(err)}`);
+    else
+      try {
+        console.log(global.__filename(dir));
+        const module = await import(`${global.__filename(dir)}?update=${Date.now()}`);
+        global.plugins[filename] = module.default || module;
+      } catch (e) {
+        conn.logger.error(`error require plugin '${filename}\n${format(e)}'`);
+      } finally {
+        global.plugins = Object.fromEntries(
+          Object.entries(global.plugins).sort(([a], [b]) => a.localeCompare(b))
+        );
+      }
+  }
+};
 
-function getSubdirectories(dir) {
-  const subdirs = [dir];
-  const files = fs.readdirSync(dir);
+Object.freeze(global.reload);
 
-  for (const file of files) {
-    const filePath = path.join(dir, file);
-    if (fs.statSync(filePath).isDirectory()) {
-      subdirs.push(...getSubdirectories(filePath));
+function watchDirRecursively(dir) {
+  fs.watch(dir, { persistent: true }, (_eventType, filename) => {
+    if (filename) {
+      global.reload(null, path.join(dir, filename));
     }
-  }
+  });
 
-  return subdirs;
-}
-
-function reloadPlugin(type, file) {
-  const filename = (file) => file.replace(/^.*[\\\/]/, "");
-
-  switch (type) {
-    case "delete":
-      delete global.plugins[file];
-      break;
-    case "add":
-    case "change":
-      (async () => {
-        try {
-          const module = await import(`file://${file}?update=${Date.now()}`);
-          global.plugins[file] = module.default || module;
-        } catch (e) {
-          console.log(
-            chalk.bold.bgRgb(247, 38, 33)("ERROR: "),
-            chalk.rgb(255, 38, 0)(util.format(e)),
-          );
-        } finally {
-          global.plugins = Object.fromEntries(
-            Object.entries(global.plugins).sort(([a], [b]) =>
-              a.localeCompare(b),
-            ),
-          );
-        }
-      })();
-      break;
-  }
+  fs.readdir(dir, { withFileTypes: true }, (err, files) => {
+    if (err) {
+      console.error(`Error reading directory ${dir}:`, err);
+      return;
+    }
+    for (const file of files) {
+      if (file.isDirectory()) {
+        watchDirRecursively(path.join(dir, file.name));
+      }
+    }
+  });
 }
 
 start();
 filesInit();
-watchFiles();
+watchDirRecursively(pluginFolder);

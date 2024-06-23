@@ -425,7 +425,7 @@
       "limit": 50,
       "glimit": 30,
       "balance": 0,
-      "exp": 1123,
+      "exp": 1185,
       "level": 1,
       "hit": 0,
       "lastclaim": 0,
@@ -1352,6 +1352,47 @@
         "id": "",
         "about": ""
       }
+    },
+    "6283164342679@s.whatsapp.net": {
+      "lastChat": 1719112210282,
+      "name": "Fathur",
+      "banned": false,
+      "bannedReason": "",
+      "afk": -1,
+      "afkReason": "",
+      "age": 0,
+      "registered": false,
+      "regTime": -1,
+      "warn": 0,
+      "limit": 50,
+      "glimit": 30,
+      "balance": 0,
+      "exp": 103,
+      "level": 1,
+      "hit": 0,
+      "lastclaim": 0,
+      "grade": "Newbie",
+      "autolevelup": false,
+      "premium": false,
+      "premiumTime": 0,
+      "openai": {
+        "messages": [],
+        "chat": false,
+        "model": ""
+      },
+      "life": {
+        "name": "",
+        "gender": "",
+        "age": "",
+        "verified": false,
+        "waifu": "",
+        "exp": 0,
+        "lastkencan": 0,
+        "money": 0,
+        "gamepas": 0,
+        "id": "",
+        "about": ""
+      }
     }
   },
   "chats": {
@@ -1418,10 +1459,10 @@
       "lastSuccess": 1719002398678
     },
     "/root/sc/command/utility/afk.js": {
-      "total": 533,
-      "success": 533,
-      "last": 1719110502940,
-      "lastSuccess": 1719110502940
+      "total": 544,
+      "success": 544,
+      "last": 1719112210283,
+      "lastSuccess": 1719112210283
     }
   },
   "msgs": {},

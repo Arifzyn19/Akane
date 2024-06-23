@@ -9,7 +9,7 @@ export default {
 
     if (!selectedCategory) {
       let body =
-        "This bot is designed to help WhatsApp users with various features, starting from downloading videos or music, creating stickers, and many other functions.\n\n┌  ◦  *Creator* : Arifzyn\n│  ◦  *Instagram* : arifzxa19\n╰───────···\n\nPlease select a category to see the available commands.";
+        "This bot is designed to help WhatsApp users with various features, starting from downloading videos or music, creating stickers, and many other functions.\n\n┌  ◦  *Creator* : Arifzyn\n│  ◦  *Instagram* : arifzxa19\n╰───────···\n\nPlease select a category to see the available commands!";
 
       const categories = new Set();
 
