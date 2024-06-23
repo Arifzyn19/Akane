@@ -12,7 +12,7 @@ global.packname = "Created Sticker By";
 global.link = "https://github.com/Arifzyn19";
 
 global.owner = ["6288213503541", "6285691464024"];
-global.pairingNumber = "6287760363490"; 
+global.pairingNumber = "62856914640248"; 
 
 global.prefix = /^[°•π÷×¶∆£¢€¥®™+✓_=|/~!?@#%^&.©^]/i;
 global.thumbnail = fs.readFileSync("./storage/media/images.jpg");
@@ -35,6 +35,31 @@ global.msg = {
   wait: "Wait a minute...",
   urlInvalid: "Url Invalid",
   notFound: "Result Not Found!",
+};
+
+global.APIs = {
+  arifzyn: "https://api.arifzyn.tech",
+  rose: "https://api.itsrose.rest",
+  xyro: "https://api.xyro.fund",
+  akane: "https://akane.my.id",
+  itzpire: "https://www.itzpire.com",
+};
+
+global.APIKeys = {
+  "https://api.arifzyn.tech": process.env.APIKEY || "",
+  "https://api.itsrose.rest": process.env.ROSE_KEY || "",
+  "https://api.xyro.fund": "xyroKey",
+};
+
+global.API = (name, path = "/", query = {}, apikeyqueryname) => {
+  const baseUrl = name in global.APIs ? global.APIs[name] : name;
+  const apiKey = apikeyqueryname ? global.APIKeys[baseUrl] : "";
+  const queryParams = new URLSearchParams({
+    ...query,
+    ...(apikeyqueryname && apiKey ? { [apikeyqueryname]: apiKey } : {}),
+  });
+  
+  return baseUrl + path + (queryParams.toString() ? "?" + queryParams : "");
 };
 
 //—————「 Don"t change it 」—————//
