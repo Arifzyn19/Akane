@@ -51,13 +51,6 @@ global.__require = function require(dir = import.meta.url) {
   return createRequire(dir);
 };
 
-loadPluginFiles(pluginFolder, pluginFilter, {
-  logger: conn.logger,
-  recursiveRead: true,
-})
-  .then((_) => console.log(Object.keys(plugins)))
-  .catch(console.error);
-
 async function start() {
   process.on("uncaughtException", (err) => console.error(err));
   process.on("unhandledRejection", (err) => console.error(err));
@@ -202,13 +195,18 @@ async function start() {
       }
     }
 
-    /*if (connection === "open") {
-            console.clear()
-            func.loading()
-            await baileys.delay(5500)
-        }*/
+    if (connection === "open") {
+      conn.logger.info("Connecting Success...")       
+    }
   });
-
+  
+  loadPluginFiles(pluginFolder, pluginFilter, {
+    logger: conn.logger,
+    recursiveRead: true,
+  })
+  .then((_) => console.log(Object.keys(plugins)))
+  .catch(console.error);
+  
   conn.ev.on("creds.update", saveCreds);
   conn.ev.on("messages.upsert", async (message) => {
     if (!message.messages) return;

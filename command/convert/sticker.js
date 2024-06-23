@@ -1,6 +1,6 @@
 export default {
   command: ["s", "sticker", "sticker"],
-  help: "sticker",
+  name: "sticker",
   tags: "convert",
 
   run: async (m, { conn }) => {
