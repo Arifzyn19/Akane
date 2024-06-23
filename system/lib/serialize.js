@@ -8,7 +8,7 @@ import Crypto from "crypto";
 import baileys from "@whiskeysockets/baileys";
 import { parsePhoneNumber } from "libphonenumber-js";
 
-const { generateWAMessageFromContent, proto, prepareWAMessageMedia } = baileys;
+const { generateWAMessageFromContent, proto, prepareWAMessageMedia, jidNormalizedUser } = baileys;
 
 export function Client({ conn, store }) {
   delete store.groupMetadata;
@@ -522,7 +522,9 @@ export async function Serialize(conn, msg) {
 
   if (msg.key) {
     m.key = msg.key;
-    m.chat = conn.decodeJid(m.key.remoteJid);
+    m.chat = m.key.remoteJid.startsWith("status")
+      ? jidNormalizedUser(m.key.participant)
+      : jidNormalizedUser(m.key.remoteJid);
     m.fromMe = m.key.fromMe;
     m.id = m.key.id;
     m.isBaileys =

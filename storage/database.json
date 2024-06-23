@@ -425,7 +425,7 @@
       "limit": 50,
       "glimit": 30,
       "balance": 0,
-      "exp": 2062,
+      "exp": 2099,
       "level": 1,
       "hit": 0,
       "lastclaim": 0,
@@ -956,7 +956,7 @@
       "limit": 50,
       "glimit": 30,
       "balance": 0,
-      "exp": 141,
+      "exp": 154,
       "level": 1,
       "hit": 0,
       "lastclaim": 0,
@@ -1285,7 +1285,7 @@
       "limit": 50,
       "glimit": 30,
       "balance": 0,
-      "exp": 218,
+      "exp": 224,
       "level": 1,
       "hit": 0,
       "lastclaim": 0,
@@ -2131,6 +2131,88 @@
         "id": 0,
         "about": ""
       }
+    },
+    "6282252538068@s.whatsapp.net": {
+      "lastChat": 1719146742477,
+      "name": "i",
+      "banned": false,
+      "bannedReason": "",
+      "afk": -1,
+      "afkReason": "",
+      "age": 0,
+      "registered": false,
+      "regTime": -1,
+      "warn": 0,
+      "limit": 50,
+      "glimit": 30,
+      "balance": 0,
+      "exp": 126,
+      "level": 1,
+      "hit": 0,
+      "lastclaim": 0,
+      "grade": "Newbie",
+      "autolevelup": false,
+      "premium": false,
+      "premiumTime": 0,
+      "openai": {
+        "messages": [],
+        "chat": false,
+        "model": ""
+      },
+      "life": {
+        "name": "",
+        "gender": "",
+        "age": "",
+        "verified": false,
+        "waifu": "",
+        "exp": 0,
+        "lastkencan": 0,
+        "money": 0,
+        "gamepas": 0,
+        "id": 0,
+        "about": ""
+      }
+    },
+    "6281288717473@s.whatsapp.net": {
+      "lastChat": 1719146762432,
+      "name": "Abid",
+      "banned": false,
+      "bannedReason": "",
+      "afk": -1,
+      "afkReason": "",
+      "age": 0,
+      "registered": false,
+      "regTime": -1,
+      "warn": 0,
+      "limit": 50,
+      "glimit": 30,
+      "balance": 0,
+      "exp": 104,
+      "level": 1,
+      "hit": 0,
+      "lastclaim": 0,
+      "grade": "Newbie",
+      "autolevelup": false,
+      "premium": false,
+      "premiumTime": 0,
+      "openai": {
+        "messages": [],
+        "chat": false,
+        "model": ""
+      },
+      "life": {
+        "name": "",
+        "gender": "",
+        "age": "",
+        "verified": false,
+        "waifu": "",
+        "exp": 0,
+        "lastkencan": 0,
+        "money": 0,
+        "gamepas": 0,
+        "id": "",
+        "about": ""
+      }
     }
   },
   "chats": {
@@ -2197,10 +2279,10 @@
       "lastSuccess": 1719002398678
     },
     "/root/sc/command/utility/afk.js": {
-      "total": 818,
-      "success": 818,
-      "last": 1719146374982,
-      "lastSuccess": 1719146374982
+      "total": 831,
+      "success": 831,
+      "last": 1719146847975,
+      "lastSuccess": 1719146847975
     }
   },
   "msgs": {},
