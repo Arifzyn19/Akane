@@ -23,6 +23,13 @@ export default new (class Function {
     this.path = path;
     this.baileys = baileys;
     this.FormData = FormData;
+    this.upload = {
+      telegra: this.telegra.bind(this),
+      pomf: this.pomf.bind(this),
+      hari: this.hari.bind(this),
+      tmp: this.tmp.bind(this),
+      freeimage: this.freeimage.bind(this),
+    };
   }
 
   __filename(pathURL = import.meta, rmPrefix = platform() !== "win32") {
@@ -430,5 +437,117 @@ export default new (class Function {
     if (wakt < "03:00") ucapanWaktu = "Selamat Tengah Malam";
 
     return ucapanWaktu;
+  }
+  
+  pomf(media) {
+    return new Promise(async (resolve, reject) => {
+      let mime = await fileTypeFromBuffer(media);
+      let form = new FormData();
+
+      form.append("files[]", media, `file-${Date.now()}.${mime.ext}`);
+
+      axios
+        .post("https://pomf.lain.la/upload.php", form, {
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+            ...form.getHeaders(),
+          },
+        })
+        .then(({ data }) => resolve(data.files[0].url))
+        .catch(reject);
+    });
+  }
+
+  telegra(media) {
+    return new Promise(async (resolve, reject) => {
+      let mime = await fileTypeFromBuffer(media);
+      let form = new FormData();
+
+      form.append("file", media, `file-${Date.now()}.${mime.ext}`);
+
+      axios
+        .post("https://telegra.ph/upload", form, {
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+            ...form.getHeaders(),
+          },
+        })
+        .then(({ data }) => resolve("https://telegra.ph" + data[0].src))
+        .catch(reject);
+    });
+  }
+
+  hari(media) {
+    return new Promise(async (resolve, reject) => {
+      let mime = await fileTypeFromBuffer(media);
+      let form = new FormData();
+
+      form.append("file", media, `file-${Date.now()}.${mime.ext}`);
+
+      axios
+        .post("https://hari.christmas/upload", form, {
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+            ...form.getHeaders(),
+          },
+        })
+        .then(({ data }) => resolve(data.downloadUrl))
+        .catch(reject);
+    });
+  }
+
+  tmp(media) {
+    return new Promise(async (resolve, reject) => {
+      let mime = await fileTypeFromBuffer(media);
+      let form = new FormData();
+
+      form.append("file", media, `file-${Date.now()}.${mime.ext}`);
+
+      axios
+        .post("https://tmpfiles.org/api/v1/upload", form, {
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+            ...form.getHeaders(),
+          },
+        })
+        .then(({ data }) => {
+          const url = data.data.url.match(/https:\/\/tmpfiles.org\/(.*)/)[1];
+          const hasil = "https://tmpfiles.org/dl/" + url;
+          resolve(hasil);
+        })
+        .catch(reject);
+    });
+  }
+
+  async freeimage(buffer) {
+    const { data: html } = await axios
+      .get("https://freeimage.host/")
+      .catch(() => null);
+    const token = html.match(/PF.obj.config.auth_token = "(.+?)";/)[1];
+    let mime = await fileTypeFromBuffer(buffer);
+    let form = new FormData();
+
+    form.append("source", buffer, `file-${Date.now()}.${mime.ext}`);
+
+    const options = {
+      type: "file",
+      action: "upload",
+      timestamp: (Date.now() / 1000).toString(),
+      auth_token: token,
+      nsfw: "0",
+    };
+    for (const [key, value] of Object.entries(options)) {
+      form.append(key, value);
+    }
+    const { data } = await axios.post("https://freeimage.host/json", form, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return data.image.url;
   }
 })();
