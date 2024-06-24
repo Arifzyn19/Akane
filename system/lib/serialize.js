@@ -8,7 +8,13 @@ import Crypto from "crypto";
 import baileys from "@whiskeysockets/baileys";
 import { parsePhoneNumber } from "libphonenumber-js";
 
-const { generateWAMessageFromContent, proto, prepareWAMessageMedia, jidNormalizedUser } = baileys;
+const {
+  generateWAMessageFromContent,
+  proto,
+  prepareWAMessageMedia,
+  jidNormalizedUser,
+  WA_DEFAULT_EPHEMERAL,
+} = baileys;
 
 export function Client({ conn, store }) {
   delete store.groupMetadata;
@@ -449,13 +455,22 @@ export function Client({ conn, store }) {
 
         let { mime, data: buffer, ext, size } = await Function.getFile(url);
 
-        if (/image/i.test(mime)) {
-          const media = await prepareWAMessageMedia(
-            { image: buffer },
-            { upload: conn.waUploadToServer },
-          );
+        if (/image|video/i.test(mime)) {
+          let media;
+          if (/image/i.test(mime)) {
+            media = await prepareWAMessageMedia(
+              { image: buffer },
+              { upload: conn.waUploadToServer },
+            );
+          } else if (/video/i.test(mime)) {
+            media = await prepareWAMessageMedia(
+              { video: buffer },
+              { upload: conn.waUploadToServer },
+            );
+          }
+
           header = {
-            ...header,
+            hasMediaAttachment: true,
             ...media,
           };
         }
@@ -499,6 +514,86 @@ export function Client({ conn, store }) {
         );
 
         conn.relayMessage(jid, msg.message, {
+          messageId: msg.key.id,
+        });
+      },
+      enumerable: true,
+      writable: true,
+    },
+    sendQuick: {
+      async value(
+        jid,
+        message,
+        footer,
+        media = null,
+        buttons,
+        quoted,
+        options = {},
+      ) {
+        let header = {
+          hasMediaAttachment: false,
+        };
+
+        let { mime, data: buffer, ext, size } = await Function.getFile(media);
+
+        if (/image|video/i.test(mime)) {
+          let media;
+          if (/image/i.test(mime)) {
+            media = await prepareWAMessageMedia(
+              { image: buffer },
+              { upload: conn.waUploadToServer },
+            );
+          } else if (/video/i.test(mime)) {
+            media = await prepareWAMessageMedia(
+              { video: buffer },
+              { upload: conn.waUploadToServer },
+            );
+          }
+
+          header = {
+            hasMediaAttachment: true,
+            ...media,
+          };
+        }
+
+        let buttonsArray = buttons.map(([buttonText, quickText]) => ({
+          name: "quick_reply",
+          buttonParamsJson: JSON.stringify({
+            display_text: buttonText,
+            id: quickText,
+          }),
+        }));
+        let content = {
+          viewOnceMessage: {
+            message: {
+              messageContextInfo: {
+                deviceListMetadata: {},
+                deviceListMetadataVersion: 2,
+              },
+              interactiveMessage: proto.Message.InteractiveMessage.create({
+                body: proto.Message.InteractiveMessage.Body.create({
+                  text: message,
+                }),
+                footer: proto.Message.InteractiveMessage.Footer.create({
+                  text: footer,
+                }),
+                header: proto.Message.InteractiveMessage.Header.create(header),
+                nativeFlowMessage:
+                  proto.Message.InteractiveMessage.NativeFlowMessage.create({
+                    buttons: buttonsArray,
+                  }),
+                contextInfo: options.contextInfo || {},
+              }),
+            },
+          },
+        };
+        let msg = generateWAMessageFromContent(
+          jid,
+          content,
+          { quoted: quoted, ephemeralExpiration: WA_DEFAULT_EPHEMERAL },
+          { quoted, userJid: quoted.key.remoteJid },
+        );
+        await conn.relayMessage(jid, msg.message, {
           messageId: msg.key.id,
         });
       },

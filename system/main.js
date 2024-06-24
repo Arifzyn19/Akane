@@ -12,7 +12,7 @@ import chokidar from "chokidar";
 import syntaxerror from "syntax-error";
 import { Boom } from "@hapi/boom";
 import NodeCache from "node-cache";
-import baileys from "@whiskeysockets/baileys";
+import baileys, { jidNormalizedUser } from "@whiskeysockets/baileys";
 import {
   plugins,
   loadPluginFiles,
@@ -21,9 +21,12 @@ import {
   pluginFilter,
 } from "./lib/plugins.js";
 
-const store = baileys.makeInMemoryStore({
-  logger: pino({ level: "fatal" }).child({ level: "fatal" }),
-});
+const logger = pino({
+  level: "fatal",
+  timestamp: () => `,"time":"${new Date().toJSON()}"`,
+}).child({ level: "fatal", class: "conn" });
+
+const store = baileys.makeInMemoryStore({ logger });
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -62,7 +65,7 @@ async function start() {
   const { state, saveCreds } =
     await baileys.useMultiFileAuthState("./system/session");
   const conn = baileys.default({
-    logger: pino({ level: "fatal" }).child({ level: "fatal" }),
+    logger,
     printQRInTerminal: false,
     auth: {
       creds: state.creds,
@@ -86,16 +89,15 @@ async function start() {
 
   store.bind(conn.ev);
 
-  conn.ev.on("contacts.update", (update) => {
-    for (let contact of update) {
-      let id = baileys.jidNormalizedUser(contact.id);
-      if (store && store.contacts)
-        store.contacts[id] = { id, name: contact.notify };
-    }
-  });
-
   await Client({ conn, store });
   global.conn = conn;
+
+  loadPluginFiles(pluginFolder, pluginFilter, {
+    logger: conn.logger,
+    recursiveRead: true,
+  })
+    .then((_) => console.log(Object.keys(plugins)))
+    .catch(console.error);
 
   if (!conn.authState.creds.registered) {
     let phoneNumber;
@@ -196,22 +198,77 @@ async function start() {
     }
 
     if (connection === "open") {
-      conn.logger.info("Connecting Success...")       
+      conn.logger.info("Connecting Success...");
     }
   });
-  
-  loadPluginFiles(pluginFolder, pluginFilter, {
-    logger: conn.logger,
-    recursiveRead: true,
-  })
-  .then((_) => console.log(Object.keys(plugins)))
-  .catch(console.error);
-  
+
   conn.ev.on("creds.update", saveCreds);
+
+  // add contacts update to store
+  conn.ev.on("contacts.update", (update) => {
+    for (let contact of update) {
+      let id;
+      try {
+        id = jidNormalizedUser(contact.id);
+        if (!id) {
+          console.error(
+            `jidNormalizedUser failed or returned undefined for contact id: ${contact.id}`,
+          );
+          continue;
+        }
+      } catch (error) {
+        console.error(
+          `Error normalizing JID for contact id: ${contact.id}`,
+          error,
+        );
+        continue;
+      }
+
+      if (store && store.contacts) {
+        if (!store.contacts[id]) {
+          console.warn(
+            `No existing contact found for id: ${id}. Creating new contact entry.`,
+          );
+        }
+
+        store.contacts[id] = {
+          ...(store.contacts?.[id] || {}),
+          ...(contact || {}),
+        };
+      }
+    }
+  });
+
+  // add contacts upsert to store
+  conn.ev.on("contacts.upsert", (update) => {
+    for (let contact of update) {
+      let id = jidNormalizedUser(contact.id);
+      if (store && store.contacts)
+        store.contacts[id] = { ...(contact || {}), isContact: true };
+    }
+  });
+
+  // nambah perubahan grup ke store
+  conn.ev.on("groups.update", (updates) => {
+    for (const update of updates) {
+      const id = update.id;
+      if (store.groupMetadata[id]) {
+        store.groupMetadata[id] = {
+          ...(store.groupMetadata[id] || {}),
+          ...(update || {}),
+        };
+      }
+    }
+  });
+
   conn.ev.on("messages.upsert", async (message) => {
     if (!message.messages) return;
 
     const m = await Serialize(conn, message.messages[0]);
+
+    if (store.groupMetadata && Object.keys(store.groupMetadata).length === 0)
+      store.groupMetadata = await client.groupFetchAllParticipating();
+
     await (
       await import(`./handler.js?v=${Date.now()}`)
     ).handler(conn, m, message);

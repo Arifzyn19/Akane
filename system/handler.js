@@ -1,3 +1,4 @@
+import * as os from "os";
 import path from "path";
 import chalk from "chalk";
 import fs from "fs";
@@ -82,8 +83,8 @@ export async function handler(conn, m, chatUpdate) {
         m.plugin = name;
         if (!isAccept) continue;
         if (m.chat in db.data.chats || m.sender in db.data.users) {
-          if (db.data.chats[m.chat]?.isBanned) return;
-          if (db.data.users[m.sender]?.banned) return;
+          if (!m.isOwner && db.data.chats[m.chat]?.isBanned) return;
+          if (!m.isOwner && db.data.users[m.sender]?.banned) return;
         }
 
         if (plugin.owner && !m.isOwner) {
