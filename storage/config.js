@@ -12,7 +12,7 @@ global.packname = "Created Sticker By";
 global.link = "https://github.com/Arifzyn19";
 
 global.owner = ["6288213503541", "6285691464024"];
-global.pairingNumber = "62856914640248";
+global.pairingNumber = "62895347198105";
 
 global.prefix = /^[°•π÷×¶∆£¢€¥®™+✓_=|/~!?@#%^&.©^]/i;
 global.thumbnail = fs.readFileSync("./storage/media/images.jpg");

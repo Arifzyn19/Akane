@@ -104,21 +104,6 @@ async function start() {
 
     if (!!global.pairingNumber) {
       phoneNumber = global.pairingNumber.replace(/[^0-9]/g, "");
-
-      if (
-        !Object.keys(baileys.PHONENUMBER_MCC).some((v) =>
-          phoneNumber.startsWith(v),
-        )
-      ) {
-        console.log(
-          chalk.bgBlack(
-            chalk.redBright(
-              "Start with your country's WhatsApp code, Example : 62xxx",
-            ),
-          ),
-        );
-        process.exit(0);
-      }
     } else {
       phoneNumber = await question(
         chalk.bgBlack(chalk.greenBright("Please type your WhatsApp number : ")),
